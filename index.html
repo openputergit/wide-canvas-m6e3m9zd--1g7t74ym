@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Employee Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-50 to-blue-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <!-- User Type Selection -->
+        <div id="userTypeForm" class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-2xl font-bold text-center text-slate-800 mb-6">Smart Attendance System</h1>
+            <div class="flex gap-4">
+                <button onclick="selectUserType('employee')" class="flex-1 bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600 transition">Employee</button>
+                <button onclick="selectUserType('owner')" class="flex-1 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition">Owner</button>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <button onclick="backToUserType()" class="mb-4 text-gray-600 hover:text-gray-800">
+                <i class="bi bi-arrow-left"></i> Back
+            </button>
+            <h2 class="text-xl font-bold text-center text-slate-800 mb-6">Login</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" pattern="[0-9]{10}" maxlength="10">
+                </div>
+                <button onclick="verifySimAndSendOTP()" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">Get OTP</button>
+            </div>
+        </div>
+
+        <!-- OTP Verification -->
+        <div id="otpForm" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold text-center text-slate-800 mb-6">Verify OTP</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Enter OTP</label>
+                    <input type="text" id="otp" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" maxlength="6">
+                </div>
+                <button onclick="verifyOTP()" class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition">Verify OTP</button>
+            </div>
+        </div>
+
+        <!-- Face Recognition -->
+        <div id="faceRecognitionForm" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold text-center text-slate-800 mb-6">Face Verification</h2>
+            <div class="space-y-4">
+                <video id="video" class="w-full rounded-lg" autoplay></video>
+                <canvas id="canvas" class="hidden"></canvas>
+                <button onclick="startFaceRecognition()" class="w-full bg-indigo-500 text-white py-2 rounded-md hover:bg-indigo-600 transition">Verify Face</button>
+            </div>
+        </div>
+
+        <!-- Attendance Marking -->
+        <div id="attendanceForm" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold text-center text-slate-800 mb-6">Mark Attendance</h2>
+            <div class="space-y-4">
+                <div id="locationStatus" class="text-center text-sm mb-4"></div>
+                <div id="timeStatus" class="text-center text-sm mb-4"></div>
+                <button onclick="markAttendance()" id="markAttendanceBtn" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">Mark Present</button>
+                <p id="attendanceMessage" class="text-center mt-4"></p>
+            </div>
+        </div>
+
+        <!-- Owner Dashboard -->
+        <div id="ownerDashboard" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold text-center text-slate-800 mb-6">Owner Dashboard</h2>
+            <div class="space-y-4">
+                <button onclick="showCreateEmployee()" class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition">Create Employee</button>
+                <button onclick="showAttendanceReport()" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">View Reports</button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-gray-600 text-sm">
+            DEVELOPED BY ANKIT SOMRA
+        </div>
+    </div>
+
+    <script>
+        let currentUserType = '';
+        const OFFICE_COORDS = { latitude: 12.9716, longitude: 77.5946 };
+        const ALLOWED_RADIUS = 100;
+        const WORK_START_TIME = 9;
+        const WORK_END_TIME = 18;
+
+        function selectUserType(type) {
+            currentUserType = type;
+            document.getElementById('userTypeForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function backToUserType() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('userTypeForm').classList.remove('hidden');
+        }
+
+        function verifySimAndSendOTP() {
+            const mobile = document.getElementById('mobileNumber').value;
+            if(mobile.length === 10) {
+                // Simulate SIM verification
+                // In production, implement actual SIM verification using carrier APIs
+                simulateSimVerification(mobile);
+            } else {
+                alert('Please enter a valid 10-digit mobile number');
+            }
+        }
+
+        function simulateSimVerification(mobile) {
+            // Simulate SIM verification success
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('otpForm').classList.remove('hidden');
+        }
+
+        function verifyOTP() {
+            const otp = document.getElementById('otp').value;
+            if(otp.length === 6) {
+                document.getElementById('otpForm').classList.add('hidden');
+                if(currentUserType === 'employee') {
+                    document.getElementById('faceRecognitionForm').classList.remove('hidden');
+                    initFaceRecognition();
+                } else {
+                    document.getElementById('ownerDashboard').classList.remove('hidden');
+                }
+            } else {
+                alert('Please enter a valid 6-digit OTP');
+            }
+        }
+
+        async function initFaceRecognition() {
+            try {
+                await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+                await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+                await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+                
+                const video = document.getElementById('video');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Error initializing face recognition:', err);
+                alert('Unable to access camera');
+            }
+        }
+
+        async function startFaceRecognition() {
+            // Simulate face recognition success
+            document.getElementById('faceRecognitionForm').classList.add('hidden');
+            document.getElementById('attendanceForm').classList.remove('hidden');
+            checkLocationAndTime();
+        }
+
+        function checkLocationAndTime() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const distance = calculateDistance(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                        OFFICE_COORDS.latitude,
+                        OFFICE_COORDS.longitude
+                    );
+
+                    const locationStatus = document.getElementById('locationStatus');
+                    if (distance <= ALLOWED_RADIUS) {
+                        locationStatus.textContent = "✅ You are within office premises";
+                        locationStatus.classList.add('text-green-600');
+                    } else {
+                        locationStatus.textContent = "❌ You are not within office premises";
+                        locationStatus.classList.add('text-red-600');
+                        document.getElementById('markAttendanceBtn').classList.add('disabled');
+                    }
+                });
+            }
+
+            const now = new Date();
+            const hour = now.getHours();
+            const timeStatus = document.getElementById('timeStatus');
+            
+            if (hour >= WORK_START_TIME && hour < WORK_END_TIME) {
+                timeStatus.textContent = "✅ Within working hours";
+                timeStatus.classList.add('text-green-600');
+            } else {
+                timeStatus.textContent = "❌ Outside working hours";
+                timeStatus.classList.add('text-red-600');
+                document.getElementById('markAttendanceBtn').classList.add('disabled');
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        function markAttendance() {
+            const attendanceMessage = document.getElementById('attendanceMessage');
+            attendanceMessage.textContent = "✅ Attendance marked successfully!";
+            attendanceMessage.classList.add('text-green-600', 'font-semibold');
+            document.getElementById('markAttendanceBtn').classList.add('disabled');
+            // In production, send attendance data to server
+        }
+
+        function showCreateEmployee() {
+            alert('Employee creation functionality to be implemented');
+            // Implement employee creation form
+        }
+
+        function showAttendanceReport() {
+            alert('Attendance report functionality to be implemented');
+            // Implement attendance report view
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
